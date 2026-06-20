@@ -52,6 +52,7 @@ Open Discord → Settings → Vencord → Plugins → toggle **DiscordSpotifyLyr
 |---|---|
 | `clearOnStop` | Clear status when playback stops/pauses |
 | `fallbackTrackText` | Show track name when lyrics are unavailable |
+| `customEmoji` | Emoji shown in custom status (empty = musical note default) |
 | `trackSwitchBoost` | Faster polling shortly after a track change |
 | `forceRefreshOnTrackSwitch` | Fetch lyrics immediately when switching tracks |
 | `debugMode` | Enable verbose debug logs |

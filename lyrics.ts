@@ -4,6 +4,10 @@ import { debugLog } from "./debug";
 const BASE_URL = "https://lrclib.net/api";
 const cache = new Map<string, LyricLine[] | null>();
 
+function cacheKey(trackId: string, albumName: string) {
+    return albumName ? `${trackId}:${albumName}` : trackId;
+}
+
 type NetworkAccessState = "unknown" | "allowed" | "blocked";
 let networkAccess: NetworkAccessState = "unknown";
 let permissionRequested = false;
@@ -15,9 +19,11 @@ export function setLyricsDebugMode(enabled: boolean) {
     if (_setDebugMode) _setDebugMode(enabled);
 }
 
-export function clearLyricsCache(trackId?: string) {
+export function clearLyricsCache(trackId?: string, albumName?: string) {
     if (trackId) {
-        cache.delete(trackId);
+        const key = albumName ? cacheKey(trackId, albumName) : trackId;
+        cache.delete(key);
+        if (!albumName) cache.forEach((_, k) => { if (k.startsWith(trackId)) cache.delete(k); });
         debugLog("lyrics", `Cache cleared for ${trackId}`);
     } else {
         cache.clear();
@@ -76,12 +82,14 @@ export async function getLyrics(
     durationMs = 0,
     forceRefresh = false,
 ): Promise<LyricLine[] | null> {
+    const key = cacheKey(trackId, albumName);
+
     if (forceRefresh) {
-        cache.delete(trackId);
+        cache.delete(key);
         debugLog("lyrics", `Force refresh: ${trackName} - ${artistName}`);
     }
 
-    if (cache.has(trackId)) return cache.get(trackId) ?? null;
+    if (cache.has(key)) return cache.get(key) ?? null;
 
     if (networkAccess === "unknown") await initLyricsNetworkAccess();
 
@@ -91,7 +99,7 @@ export async function getLyrics(
             console.warn("[DiscordSpotifyLyrics] LRCLIB blocked by CSP. Grant permission and fully restart Discord.");
         }
         debugLog("lyrics", `CSP blocked: ${trackId}`);
-        cache.set(trackId, null);
+        cache.set(key, null);
         return null;
     }
 
@@ -103,7 +111,7 @@ export async function getLyrics(
         const res = await fetch(`${BASE_URL}/get?${params}`);
 
         if (res.status === 404) {
-            cache.set(trackId, null);
+            cache.set(key, null);
             debugLog("lyrics", `Not found (404): ${trackName} - ${artistName}`);
             return null;
         }
@@ -112,17 +120,17 @@ export async function getLyrics(
 
         const data = await res.json();
         if (!data?.syncedLyrics) {
-            cache.set(trackId, null);
+            cache.set(key, null);
             debugLog("lyrics", `No syncedLyrics in response: ${trackId}`);
             return null;
         }
 
         const lines = parseLrc(data.syncedLyrics);
-        cache.set(trackId, lines);
+        cache.set(key, lines);
         debugLog("lyrics", `Loaded ${lines.length} lines for ${trackId}`);
         return lines;
     } catch {
-        cache.set(trackId, null);
+        cache.set(key, null);
         debugLog("lyrics", `Request failed: ${trackName} - ${artistName}`);
         return null;
     }

@@ -32,6 +32,11 @@ const settings = definePluginSettings({
         description: "Show track name when synced lyrics are unavailable",
         default: true,
     },
+    customEmoji: {
+        type: OptionType.STRING,
+        description: "Emoji shown in the custom status (defaults to musical note)",
+        default: "",
+    },
     trackSwitchBoost: {
         type: OptionType.BOOLEAN,
         description: "Poll faster for 3s after a track switch",
@@ -88,7 +93,7 @@ function stopScheduler() {
 }
 
 function onLineChange(line: LyricLine) {
-    setCustomStatus(normalizeLyricLine(line));
+    setCustomStatus(normalizeLyricLine(line), settings.store.customEmoji);
 }
 
 function resetRuntimeState() {
@@ -104,11 +109,11 @@ function applyDebugMode() {
 }
 
 function setFallbackTrackStatus(track: SpotifyTrackState) {
-    if (settings.store.fallbackTrackText) {
-        setCustomStatus(`🎵 ${track.trackName} - ${track.artistName}`);
-    } else {
+    if (!settings.store.fallbackTrackText) {
         clearCustomStatus();
+        return;
     }
+    setCustomStatus(`♪ ${track.trackName} - ${track.artistName}`, settings.store.customEmoji);
 }
 
 function shouldIgnoreLyricResult(loadToken: number, trackId: string) {
@@ -225,9 +230,9 @@ function stopPolling() {
     }
 }
 
-function forceRefreshCurrentTrackLyrics() {
+function forceRefreshCurrentTrackLyrics(albumName?: string) {
     if (!currentTrackId) return;
-    clearLyricsCache(currentTrackId);
+    clearLyricsCache(currentTrackId, albumName);
     trackLoadToken++;
     debugLog("Manual force refresh", { trackId: currentTrackId });
     currentTrackId = null;

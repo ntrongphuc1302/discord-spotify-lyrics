@@ -19,7 +19,7 @@ export class LyricScheduler {
   start(progressMs: number) {
     this.stop();
 
-    this.startedAt = Date.now();
+    this.startedAt = performance.now();
     this.startProgressMs = progressMs;
 
     const passed = this.lyrics.filter(l => l.timeMs <= progressMs);
@@ -46,6 +46,6 @@ export class LyricScheduler {
   }
 
   get estimatedProgressMs() {
-    return this.startProgressMs + (Date.now() - this.startedAt);
+    return this.startProgressMs + (performance.now() - this.startedAt);
   }
 }
