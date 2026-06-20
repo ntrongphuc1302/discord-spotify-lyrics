@@ -1,115 +1,103 @@
-# DiscordSpotifyLyrics (Vencord Userplugin)
+# Discord Spotify Lyrics
 
-Real-time Spotify lyrics in your Discord status.
-DEMO:https://www.tiktok.com/@shiin2ii/video/7648883481040211217
-## Overview
+> Vencord userplugin — displays synced Spotify lyrics as your Discord custom status in real time.
 
-DiscordSpotifyLyrics is an unofficial Vencord userplugin that reads the current Spotify track from Discord activity, fetches synced lyrics from LRCLIB, and updates your Discord custom status line by line.
-
-## Metadata
-
-- Plugin name: DiscordSpotifyLyrics
-- Author: ntrongphuc1302
-- GitHub: https://github.com/ntrongphuc1302
-
-- Plugin type: Community userplugin (unofficial)
-- Lyrics provider: LRCLIB (https://lrclib.net)
-
-## Disclaimer
-
-This is a community-made plugin. It is not affiliated with, maintained by, or officially endorsed by the Vencord team.
-
-## Features
-
-- Real-time lyric sync to Discord custom status
-- Fallback to track and artist text when synced lyrics are unavailable
-- Queue-based status updates with retry handling
-- Track-switch optimization for faster lyric response
-- Optional debug mode for diagnostics
-
-## Requirements
-
-- Discord desktop (Stable/PTB/Canary)
-- Vencord installed and working on your Discord client
-- Vencord source repository available locally
-- Node.js 18+ and pnpm
-- Spotify account linked to Discord
-- Network access to LRCLIB
-
-## Installation Guide
-
-Source workflow only: install and verify Vencord first, then install this plugin.
-
-### Phase 1: Install Vencord (Required)
-
-1. Install Vencord on your Discord client (Stable/PTB/Canary) using the official Vencord installer.
-2. Launch Discord and confirm Vencord is active:
-	- Open Discord Settings.
-	- Verify the Vencord section is visible.
-3. Close Discord completely before proceeding.
-
-### Phase 2: Add DiscordSpotifyLyrics to Vencord Source
-
-1. Open your local Vencord source repository.
-2. Copy `discord-spotify-lyrics` from this repository into:
-	- `src/userplugins/discord-spotify-lyrics`
-3. In the Vencord repository, run build:
-
-```bash
-pnpm build
+```
+Now Playing → Discord status shows synchronized lyrics
 ```
 
-4. Inject the build into your Discord client:
+---
+
+## Installation
+
+### Requirements
+
+- Discord desktop (Stable / PTB / Canary)
+- [Vencord](https://github.com/Vendicated/Vencord) installed
+- Spotify account linked to Discord
+- Node.js 18+, pnpm
+
+### Steps
+
+**1. Install Vencord**
 
 ```bash
+# Use the official installer: https://github.com/Vendicated/Vencord
+```
+
+**2. Add the plugin**
+
+```bash
+# Copy the plugin folder into your Vencord source
+cp -r discord-spotify-lyrics /path/to/Vencord/src/userplugins/
+```
+
+**3. Build & Inject**
+
+```bash
+cd /path/to/Vencord
+pnpm build
 pnpm inject
 ```
 
-5. Start Discord, then enable `DiscordSpotifyLyrics` in:
-	- Discord Settings -> Vencord -> Plugins
+**4. Enable**
 
-### Phase 3: First-Run Validation
+Open Discord → Settings → Vencord → Plugins → toggle **DiscordSpotifyLyrics** on
 
-1. Ensure Spotify is linked to Discord.
-2. Play a track on Spotify desktop.
-3. Confirm your custom status updates with lyrics.
-4. If prompted for CSP permission to access LRCLIB, allow it and fully restart Discord.
+---
 
-## Configuration
+## Settings
 
-Available plugin settings include:
+| Option | Description |
+|---|---|
+| `clearOnStop` | Clear status when playback stops/pauses |
+| `fallbackTrackText` | Show track name when lyrics are unavailable |
+| `trackSwitchBoost` | Faster polling shortly after a track change |
+| `forceRefreshOnTrackSwitch` | Fetch lyrics immediately when switching tracks |
+| `debugMode` | Enable verbose debug logs |
 
-- `clearOnStop`: Clear status when playback stops/pauses
-- `fallbackTrackText`: Show track text when lyrics are unavailable
-- `trackSwitchBoost`: Faster polling shortly after track change
-- `forceRefreshOnTrackSwitch`: Refresh lyric fetch when changing tracks
-- `debugMode`: Verbose logs for troubleshooting
+> Manual refresh: `globalThis.discordSpotifyLyricsForceRefresh()`
 
-Manual refresh helper (advanced):
+---
 
-- `globalThis.discordSpotifyLyricsForceRefresh()`
+## Privacy
 
-## Permissions and Privacy
+- No password required
+- No API key needed
+- Only requests data from `lrclib.net`
+- CSP permission for `lrclib.net` may be prompted on first setup
 
-- The plugin may request CSP permission for `https://lrclib.net` to fetch lyrics.
-- No account password is requested.
-- No external API key is required.
+---
 
 ## Troubleshooting
 
-- No lyrics shown: Verify Spotify is linked to Discord and track activity is visible.
-- CSP blocked: Grant LRCLIB permission prompt, then fully restart Discord.
-- Delay on track change: Enable `trackSwitchBoost` and `forceRefreshOnTrackSwitch`.
+| Issue | Fix |
+|---|---|
+| No lyrics shown | Confirm Spotify is linked to Discord; enable `fallbackTrackText` |
+| CSP blocked | Grant the permission prompt, then fully restart Discord |
+| Delay on track switch | Enable `trackSwitchBoost` + `forceRefreshOnTrackSwitch` |
 
-## Support
+---
 
-- Issues and feature requests: https://github.com/ntrongphuc1302/discord-spotify-lyrics/issues
+## Project Structure
 
-## Folder Structure
+```
+discord-spotify-lyrics/
+├── index.ts      # Plugin entry point
+├── spotify.ts    # Read track from Discord activity
+├── lyrics.ts     # Fetch lyrics from LRCLIB
+├── status.ts     # Update Discord custom status
+├── scheduler.ts  # Queue & retry logic
+├── types.ts      # Type definitions
+└── native.ts
+```
 
-- `discord-spotify-lyrics/index.ts`
-- `discord-spotify-lyrics/lyrics.ts`
-- `discord-spotify-lyrics/scheduler.ts`
-- `discord-spotify-lyrics/spotify.ts`
-- `discord-spotify-lyrics/status.ts`
-- `discord-spotify-lyrics/types.ts`
+---
+
+## Issues & Support
+
+→ [GitHub Issues](https://github.com/ntrongphuc1302/discord-spotify-lyrics/issues)
+
+---
+
+> **Disclaimer** — Community plugin, not affiliated with or endorsed by the Vencord team.
